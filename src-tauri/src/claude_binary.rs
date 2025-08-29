@@ -164,11 +164,13 @@ fn discover_system_installations() -> Vec<ClaudeInstallation> {
     installations
 }
 
-/// Try using the 'which' command to find Claude
+/// Try using the 'which' command (Unix) or 'where' command (Windows) to find Claude
 fn try_which_command() -> Option<ClaudeInstallation> {
-    debug!("Trying 'which claude' to find binary...");
+    // Use 'where' on Windows, 'which' on Unix
+    let command = if cfg!(windows) { "where" } else { "which" };
+    debug!("Trying '{}' command to find claude binary...", command);
 
-    match Command::new("which").arg("claude").output() {
+    match Command::new(command).arg("claude").output() {
         Ok(output) if output.status.success() => {
             let output_str = String::from_utf8_lossy(&output.stdout).trim().to_string();
 
@@ -176,21 +178,27 @@ fn try_which_command() -> Option<ClaudeInstallation> {
                 return None;
             }
 
-            // Parse aliased output: "claude: aliased to /path/to/claude"
-            let path = if output_str.starts_with("claude:") && output_str.contains("aliased to") {
-                output_str
-                    .split("aliased to")
-                    .nth(1)
-                    .map(|s| s.trim().to_string())
+            // Parse output based on platform
+            let path = if cfg!(windows) {
+                // On Windows, 'where' returns multiple lines, take the first one
+                output_str.lines().next().map(|s| s.trim().to_string())
             } else {
-                Some(output_str)
+                // On Unix, parse aliased output: "claude: aliased to /path/to/claude"
+                if output_str.starts_with("claude:") && output_str.contains("aliased to") {
+                    output_str
+                        .split("aliased to")
+                        .nth(1)
+                        .map(|s| s.trim().to_string())
+                } else {
+                    Some(output_str)
+                }
             }?;
 
-            debug!("'which' found claude at: {}", path);
+            debug!("'{}' found claude at: {}", command, path);
 
             // Verify the path exists
             if !PathBuf::from(&path).exists() {
-                warn!("Path from 'which' does not exist: {}", path);
+                warn!("Path from '{}' does not exist: {}", command, path);
                 return None;
             }
 
@@ -200,7 +208,7 @@ fn try_which_command() -> Option<ClaudeInstallation> {
             Some(ClaudeInstallation {
                 path,
                 version,
-                source: "which".to_string(),
+                source: command.to_string(),
                 installation_type: InstallationType::System,
             })
         }
@@ -469,6 +477,20 @@ pub fn create_command_with_env(program: &str) -> Command {
             || key == "NVM_BIN"
             || key == "HOMEBREW_PREFIX"
             || key == "HOMEBREW_CELLAR"
+            // Windows-specific environment variables for Claude authentication
+            || key == "USERPROFILE"
+            || key == "APPDATA"
+            || key == "LOCALAPPDATA"
+            || key == "USERNAME"
+            || key == "COMPUTERNAME"
+            || key == "SYSTEMROOT"
+            || key == "PROGRAMFILES"
+            || key == "PROGRAMFILES(X86)"
+            // Claude-specific environment variables
+            || key == "CLAUDECODE"
+            || key == "CLAUDE_CODE_ENTRYPOINT"
+            || key.starts_with("CLAUDE_")
+            || key.starts_with("ANTHROPIC_")
             // Add proxy environment variables (only uppercase)
             || key == "HTTP_PROXY"
             || key == "HTTPS_PROXY"
