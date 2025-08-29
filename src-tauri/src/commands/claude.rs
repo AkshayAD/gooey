@@ -748,9 +748,10 @@ pub async fn check_claude_auth_status(app: AppHandle) -> Result<ClaudeAuthStatus
         }
     };
 
-    // Check for Claude config directory
-    let home_var = if cfg!(windows) { "USERPROFILE" } else { "HOME" };
-    let home = std::env::var(home_var).map_err(|_| "Failed to get home directory".to_string())?;
+    // Check for Claude config directory - try both Windows and Unix env vars
+    let home = std::env::var("USERPROFILE")
+        .or_else(|_| std::env::var("HOME"))
+        .map_err(|_| "Failed to get home directory".to_string())?;
     
     let claude_config_dir = std::path::PathBuf::from(home).join(".claude");
     let config_path = claude_config_dir.to_string_lossy().to_string();

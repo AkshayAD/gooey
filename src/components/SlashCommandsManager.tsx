@@ -29,7 +29,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { api, type SlashCommand } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { COMMON_TOOL_MATCHERS } from "@/types/hooks";
-import { useTrackEvent } from "@/hooks";
 
 interface SlashCommandsManagerProps {
   projectPath?: string;
@@ -117,8 +116,6 @@ export const SlashCommandsManager: React.FC<SlashCommandsManagerProps> = ({
   const [commandToDelete, setCommandToDelete] = useState<SlashCommand | null>(null);
   const [deleting, setDeleting] = useState(false);
   
-  // Analytics tracking
-  const trackEvent = useTrackEvent();
 
   // Load commands on mount
   useEffect(() => {
@@ -180,11 +177,6 @@ export const SlashCommandsManager: React.FC<SlashCommandsManagerProps> = ({
         commandForm.scope === 'project' ? projectPath : undefined
       );
       
-      // Track command creation
-      trackEvent.slashCommandCreated({
-        command_type: editingCommand ? 'custom' : 'custom',
-        has_parameters: commandForm.content.includes('$ARGUMENTS')
-      });
 
       setEditDialogOpen(false);
       await loadCommands();

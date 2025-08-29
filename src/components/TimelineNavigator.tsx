@@ -22,7 +22,6 @@ import { Label } from "@/components/ui/label";
 import { api, type Checkpoint, type TimelineNode, type SessionTimeline, type CheckpointDiff } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
-import { useTrackEvent } from "@/hooks";
 
 interface TimelineNavigatorProps {
   sessionId: string;
@@ -68,8 +67,6 @@ export const TimelineNavigator: React.FC<TimelineNavigatorProps> = ({
   const [diff, setDiff] = useState<CheckpointDiff | null>(null);
   const [compareCheckpoint, setCompareCheckpoint] = useState<Checkpoint | null>(null);
   
-  // Analytics tracking
-  const trackEvent = useTrackEvent();
 
   // Load timeline on mount and whenever refreshVersion bumps
   useEffect(() => {
@@ -126,12 +123,6 @@ export const TimelineNavigator: React.FC<TimelineNavigatorProps> = ({
         checkpointDescription || undefined
       );
       
-      // Track checkpoint creation
-      const checkpointNumber = timeline ? timeline.totalCheckpoints + 1 : 1;
-      trackEvent.checkpointCreated({
-        checkpoint_number: checkpointNumber,
-        session_duration_at_checkpoint: Date.now() - sessionStartTime
-      });
       
       // Call parent callback if provided
       if (onCheckpointCreated) {
@@ -173,11 +164,6 @@ export const TimelineNavigator: React.FC<TimelineNavigatorProps> = ({
       // Then restore
       await api.restoreCheckpoint(checkpoint.id, sessionId, projectId, projectPath);
       
-      // Track checkpoint restoration
-      trackEvent.checkpointRestored({
-        checkpoint_id: checkpoint.id,
-        time_since_checkpoint_ms: timeSinceCheckpoint
-      });
       
       await loadTimeline();
       onCheckpointSelect(checkpoint);
