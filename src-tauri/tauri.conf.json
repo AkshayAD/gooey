@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Gooey",
+  "productName": "Clode",
   "version": "0.1.0",
-  "identifier": "gooey.asterisk.so",
+  "identifier": "clode.asterisk.so",
   "build": {
     "beforeDevCommand": "bun run dev",
     "devUrl": "http://localhost:1420",
@@ -13,7 +13,7 @@
     "macOSPrivateApi": true,
     "windows": [
       {
-        "title": "Gooey",
+        "title": "Clode",
         "width": 800,
         "height": 600,
         "decorations": false,
@@ -25,7 +25,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; img-src 'self' asset: https://asset.localhost blob: data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-eval' https://app.posthog.com https://*.posthog.com https://*.i.posthog.com https://*.assets.i.posthog.com; connect-src 'self' ipc: https://ipc.localhost https://app.posthog.com https://*.posthog.com https://*.i.posthog.com",
+      "csp": "default-src 'self'; img-src 'self' asset: https://asset.localhost blob: data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-eval'; connect-src 'self' ipc: https://ipc.localhost",
       "assetProtocol": {
         "enable": true,
         "scope": [
@@ -62,20 +62,23 @@
       "rpm",
       "appimage",
       "app",
-      "dmg"
+      "dmg",
+      "msi",
+      "nsis"
     ],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
       "icons/128x128@2x.png",
-      "icons/icon.icns"
+      "icons/icon.icns",
+      "icons/icon.ico"
     ],
     "resources": [],
     "externalBin": [],
     "copyright": "© 2025 Asterisk. All rights reserved.",
     "category": "DeveloperTool",
-    "shortDescription": "GUI app and Toolkit for Claude Code",
-    "longDescription": "Gooey is a comprehensive GUI application and toolkit for working with Claude Code, providing an intuitive interface for AI-assisted development.",
+    "shortDescription": "Desktop app and Toolkit for Claude Code",
+    "longDescription": "Clode is a comprehensive desktop application and toolkit for working with Claude Code, providing an intuitive interface for AI-assisted development.",
     "linux": {
       "appimage": {
         "bundleMediaFramework": true
@@ -91,6 +94,27 @@
       "signingIdentity": null,
       "providerShortName": null,
       "entitlements": "entitlements.plist"
+    },
+    "windows": {
+      "certificateThumbprint": null,
+      "digestAlgorithm": "sha256",
+      "timestampUrl": "",
+      "webviewInstallMode": {
+        "type": "embedBootstrapper"
+      },
+      "nsis": {
+        "installMode": "perUser",
+        "installerIcon": "icons/icon.ico",
+        "installScript": null,
+        "languages": ["English"],
+        "displayLanguageSelector": false
+      },
+      "msi": {
+        "enableProductUpgradeCode": true,
+        "upgradeCode": null,
+        "productName": "Clode",
+        "installScope": "perUser"
+      }
     }
   }
 }

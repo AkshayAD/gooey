@@ -17,7 +17,7 @@ use commands::agents::{
     list_running_sessions, load_agent_session_history, set_claude_binary_path, stream_session_output, update_agent, AgentDb,
 };
 use commands::claude::{
-    cancel_claude_execution, check_auto_checkpoint, check_claude_version, cleanup_old_checkpoints,
+    cancel_claude_execution, check_auto_checkpoint, check_claude_version, check_claude_auth_status, cleanup_old_checkpoints,
     clear_checkpoint_manager, continue_claude_code, create_checkpoint, create_project, execute_claude_code,
     find_claude_md_files, fork_from_checkpoint, get_checkpoint_diff, get_checkpoint_settings,
     get_checkpoint_state_stats, get_claude_session_output, get_claude_settings, get_home_directory, get_project_sessions,
@@ -181,6 +181,7 @@ fn main() {
             open_new_session,
             get_system_prompt,
             check_claude_version,
+            check_claude_auth_status,
             save_system_prompt,
             save_claude_settings,
             find_claude_md_files,
