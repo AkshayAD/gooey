@@ -219,8 +219,10 @@ pub fn init_database(app: &AppHandle) -> SqliteResult<Connection> {
     let app_dir = app
         .path()
         .app_data_dir()
-        .expect("Failed to get app data dir");
-    std::fs::create_dir_all(&app_dir).expect("Failed to create app data dir");
+        .map_err(|e| rusqlite::Error::InvalidPath(format!("Failed to get app data dir: {}", e).into()))?;
+    
+    std::fs::create_dir_all(&app_dir)
+        .map_err(|e| rusqlite::Error::InvalidPath(format!("Failed to create app data dir: {}", e).into()))?;
 
     let db_path = app_dir.join("agents.db");
     let conn = Connection::open(db_path)?;
@@ -1495,7 +1497,7 @@ pub async fn cleanup_finished_processes(db: State<'_, AgentDb>) -> Result<Vec<i6
 
     for (run_id, pid) in running_processes {
         // Check if the process is still running
-        let is_running = if cfg!(target_os = "windows") {
+        let is_running = if std::env::consts::OS == "windows" {
             // On Windows, use tasklist to check if process exists
             match std::process::Command::new("tasklist")
                 .args(["/FI", &format!("PID eq {}", pid)])

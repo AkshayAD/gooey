@@ -61,7 +61,10 @@ fn main() {
         .plugin(tauri_plugin_shell::init())
         .setup(|app| {
             // Initialize agents database
-            let conn = init_database(&app.handle()).expect("Failed to initialize agents database");
+            let conn = init_database(&app.handle()).map_err(|e| {
+                eprintln!("Failed to initialize database: {}", e);
+                format!("Database initialization failed: {}", e)
+            })?;
             
             // Load and apply proxy settings from the database
             {
@@ -110,7 +113,10 @@ fn main() {
             }
             
             // Re-open the connection for the app to manage
-            let conn = init_database(&app.handle()).expect("Failed to initialize agents database");
+            let conn = init_database(&app.handle()).map_err(|e| {
+                eprintln!("Failed to re-initialize database: {}", e);
+                format!("Database re-initialization failed: {}", e)
+            })?;
             app.manage(AgentDb(Mutex::new(conn)));
 
             // Initialize checkpoint state

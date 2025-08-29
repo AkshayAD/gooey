@@ -32,7 +32,7 @@ export function ClaudeStatusIndicator({ onConfigureClick, className }: ClaudeSta
       console.error("Failed to check Claude status:", error);
       setStatus({
         is_installed: false,
-        version: null,
+        version: undefined,
         output: "Failed to check Claude status"
       });
       setAuthStatus({

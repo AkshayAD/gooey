@@ -166,8 +166,8 @@ fn discover_system_installations() -> Vec<ClaudeInstallation> {
 
 /// Try using the 'which' command (Unix) or 'where' command (Windows) to find Claude
 fn try_which_command() -> Option<ClaudeInstallation> {
-    // Use 'where' on Windows, 'which' on Unix
-    let command = if cfg!(target_os = "windows") { "where" } else { "which" };
+    // Use 'where' on Windows, 'which' on Unix - detect at runtime
+    let command = if std::env::consts::OS == "windows" { "where" } else { "which" };
     debug!("Trying '{}' command to find claude binary...", command);
 
     match Command::new(command).arg("claude").output() {
@@ -179,7 +179,7 @@ fn try_which_command() -> Option<ClaudeInstallation> {
             }
 
             // Parse output based on platform
-            let path = if cfg!(target_os = "windows") {
+            let path = if std::env::consts::OS == "windows" {
                 // On Windows, 'where' returns multiple lines, take the first one
                 output_str.lines().next().map(|s| s.trim().to_string())
             } else {
@@ -598,7 +598,7 @@ pub fn create_command_with_env(program: &str) -> Command {
             let current_path = std::env::var("PATH").unwrap_or_default();
             let node_bin_str = node_bin_dir.to_string_lossy();
             if !current_path.contains(&node_bin_str.as_ref()) {
-                let path_separator = if cfg!(target_os = "windows") { ";" } else { ":" };
+                let path_separator = if std::env::consts::OS == "windows" { ";" } else { ":" };
                 let new_path = format!("{}{}{}", node_bin_str, path_separator, current_path);
                 debug!("Adding NVM bin directory to PATH: {}", node_bin_str);
                 cmd.env("PATH", new_path);
@@ -613,7 +613,7 @@ pub fn create_command_with_env(program: &str) -> Command {
             let current_path = std::env::var("PATH").unwrap_or_default();
             let homebrew_bin_str = program_dir.to_string_lossy();
             if !current_path.contains(&homebrew_bin_str.as_ref()) {
-                let path_separator = if cfg!(target_os = "windows") { ";" } else { ":" };
+                let path_separator = if std::env::consts::OS == "windows" { ";" } else { ":" };
                 let new_path = format!("{}{}{}", homebrew_bin_str, path_separator, current_path);
                 debug!("Adding Homebrew bin directory to PATH: {}", homebrew_bin_str);
                 cmd.env("PATH", new_path);
