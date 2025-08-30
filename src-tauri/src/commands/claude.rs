@@ -101,6 +101,17 @@ pub struct ClaudeVersionStatus {
     pub output: String,
 }
 
+/// Represents Claude authentication status
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ClaudeAuthStatus {
+    /// Whether Claude is authenticated (has valid credentials)
+    pub is_authenticated: bool,
+    /// Path to Claude config directory
+    pub config_path: Option<String>,
+    /// Details about authentication status
+    pub auth_details: String,
+}
+
 /// Represents a CLAUDE.md file found in the project
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ClaudeMdFile {
@@ -717,6 +728,102 @@ pub async fn check_claude_version(app: AppHandle) -> Result<ClaudeVersionStatus,
                 })
             }
         }
+    }
+}
+
+/// Checks Claude authentication status by looking for credentials
+#[tauri::command]
+pub async fn check_claude_auth_status(app: AppHandle) -> Result<ClaudeAuthStatus, String> {
+    log::info!("Checking Claude authentication status");
+
+    // First check if Claude binary exists
+    let claude_path = match find_claude_binary(&app) {
+        Ok(path) => path,
+        Err(e) => {
+            return Ok(ClaudeAuthStatus {
+                is_authenticated: false,
+                config_path: None,
+                auth_details: format!("Claude binary not found: {}", e),
+            });
+        }
+    };
+
+    // Check for Claude config directory - try both Windows and Unix env vars
+    let home = std::env::var("USERPROFILE")
+        .or_else(|_| std::env::var("HOME"))
+        .map_err(|_| "Failed to get home directory".to_string())?;
+    
+    let claude_config_dir = std::path::PathBuf::from(home).join(".claude");
+    let config_path = claude_config_dir.to_string_lossy().to_string();
+
+    // Check if Claude config directory exists
+    if !claude_config_dir.exists() {
+        return Ok(ClaudeAuthStatus {
+            is_authenticated: false,
+            config_path: Some(config_path),
+            auth_details: "Claude config directory not found. Please run 'claude auth login' first.".to_string(),
+        });
+    }
+
+    // Check for various credential files that Claude might use
+    let credential_files = [
+        claude_config_dir.join("credentials.json"),
+        claude_config_dir.join("config.json"),
+        claude_config_dir.join("auth.json"),
+        claude_config_dir.join("token"),
+    ];
+
+    let mut has_credentials = false;
+    for cred_file in &credential_files {
+        if cred_file.exists() && cred_file.metadata().map(|m| m.len() > 0).unwrap_or(false) {
+            has_credentials = true;
+            break;
+        }
+    }
+
+    // Try to test authentication by running a simple Claude command
+    if has_credentials {
+        let mut cmd = crate::claude_binary::create_command_with_env(&claude_path);
+        cmd.args(["--help"]);
+        
+        match cmd.output() {
+            Ok(output) if output.status.success() => {
+                Ok(ClaudeAuthStatus {
+                    is_authenticated: true,
+                    config_path: Some(config_path),
+                    auth_details: "Claude is authenticated and ready to use.".to_string(),
+                })
+            }
+            Ok(output) => {
+                let error_output = String::from_utf8_lossy(&output.stderr);
+                if error_output.contains("authentication") || error_output.contains("login") {
+                    Ok(ClaudeAuthStatus {
+                        is_authenticated: false,
+                        config_path: Some(config_path),
+                        auth_details: "Authentication required. Please run 'claude auth login'.".to_string(),
+                    })
+                } else {
+                    Ok(ClaudeAuthStatus {
+                        is_authenticated: true,
+                        config_path: Some(config_path),
+                        auth_details: "Claude appears to be authenticated.".to_string(),
+                    })
+                }
+            }
+            Err(e) => {
+                Ok(ClaudeAuthStatus {
+                    is_authenticated: false,
+                    config_path: Some(config_path),
+                    auth_details: format!("Failed to test Claude authentication: {}", e),
+                })
+            }
+        }
+    } else {
+        Ok(ClaudeAuthStatus {
+            is_authenticated: false,
+            config_path: Some(config_path),
+            auth_details: "No authentication credentials found. Please run 'claude auth login'.".to_string(),
+        })
     }
 }
 

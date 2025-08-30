@@ -19,7 +19,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { api, type MCPServer } from "@/lib/api";
-import { useTrackEvent } from "@/hooks";
 
 interface MCPServerListProps {
   /**
@@ -56,8 +55,6 @@ export const MCPServerList: React.FC<MCPServerListProps> = ({
   const [copiedServer, setCopiedServer] = useState<string | null>(null);
   const [connectedServers] = useState<string[]>([]);
   
-  // Analytics tracking
-  const trackEvent = useTrackEvent();
 
   // Group servers by scope
   const serversByScope = servers.reduce((acc, server) => {
@@ -107,11 +104,6 @@ export const MCPServerList: React.FC<MCPServerListProps> = ({
       
       await api.mcpRemove(name);
       
-      // Track server removal
-      trackEvent.mcpServerRemoved({
-        server_name: name,
-        was_connected: wasConnected
-      });
       
       onServerRemoved(name);
     } catch (error) {
@@ -130,19 +122,12 @@ export const MCPServerList: React.FC<MCPServerListProps> = ({
       const result = await api.mcpTestConnection(name);
       const server = servers.find(s => s.name === name);
       
-      // Track connection result - result is a string message
-      trackEvent.mcpServerConnected(name, true, server?.transport || 'unknown');
       
       // TODO: Show result in a toast or modal
       console.log("Test result:", result);
     } catch (error) {
       console.error("Failed to test connection:", error);
       
-      trackEvent.mcpConnectionError({
-        server_name: name,
-        error_type: 'test_failed',
-        retry_attempt: 0
-      });
     } finally {
       setTestingServer(null);
     }

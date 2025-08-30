@@ -73,6 +73,18 @@ export interface ClaudeVersionStatus {
 }
 
 /**
+ * Represents Claude authentication status
+ */
+export interface ClaudeAuthStatus {
+  /** Whether Claude is authenticated (has valid credentials) */
+  is_authenticated: boolean;
+  /** Path to Claude config directory */
+  config_path?: string;
+  /** Details about authentication status */
+  auth_details: string;
+}
+
+/**
  * Represents a CLAUDE.md file found in the project
  */
 export interface ClaudeMdFile {
@@ -602,6 +614,19 @@ export const api = {
       return await invoke<ClaudeVersionStatus>("check_claude_version");
     } catch (error) {
       console.error("Failed to check Claude version:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Checks Claude authentication status
+   * @returns Promise resolving to the authentication status
+   */
+  async checkClaudeAuthStatus(): Promise<ClaudeAuthStatus> {
+    try {
+      return await invoke<ClaudeAuthStatus>("check_claude_auth_status");
+    } catch (error) {
+      console.error("Failed to check Claude authentication:", error);
       throw error;
     }
   },

@@ -1,7 +1,7 @@
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/92fd93ed-e71b-4b94-b270-50684323dd00" alt="Gooey Logo" width="120" height="120">
+  <img src="https://github.com/user-attachments/assets/92fd93ed-e71b-4b94-b270-50684323dd00" alt="Clode Logo" width="120" height="120">
 
-  <h1>Gooey</h1>
+  <h1>Clode</h1>
   
   <p>
     <strong>A powerful GUI app and Toolkit for Claude Code</strong>
@@ -20,7 +20,7 @@
 </div>
 
 <div align="center">
-  <h2>Notice: This project ("Gooey") is not affiliated with Anthropic.</h2>
+  <h2>Notice: This project ("Clode") is not affiliated with Anthropic.</h2>
   <p>This project is not affiliated with, endorsed by, or sponsored by Anthropic. Claude is a trademark of Anthropic, PBC. This is an independent developer project using Claude.</p>
 </div>
 
@@ -33,9 +33,9 @@ https://github.com/user-attachments/assets/bf0bdf9d-ba91-45af-9ac4-7274f57075cf
 
 ## 🌟 Overview
 
-**Gooey** is a powerful desktop application that transforms how you interact with Claude Code. Built with Tauri 2, it provides a beautiful GUI for managing your Claude Code sessions, creating custom agents, tracking usage, and much more.
+**Clode** is a powerful desktop application that transforms how you interact with Claude Code. Built with Tauri 2, it provides a beautiful GUI for managing your Claude Code sessions, creating custom agents, tracking usage, and much more.
 
-Think of Gooey as your command center for Claude Code - bridging the gap between the command-line tool and a visual experience that makes AI-assisted development more intuitive and productive.
+Think of Clode as your command center for Claude Code - bridging the gap between the command-line tool and a visual experience that makes AI-assisted development more intuitive and productive.
 
 ## 📋 Table of Contents
 

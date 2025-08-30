@@ -4,7 +4,6 @@ import { X, Plus, MessageSquare, Bot, AlertCircle, Loader2, Folder, BarChart, Se
 import { useTabState } from '@/hooks/useTabState';
 import { Tab, useTabContext } from '@/contexts/TabContext';
 import { cn } from '@/lib/utils';
-import { useTrackEvent } from '@/hooks';
 
 interface TabItemProps {
   tab: Tab;
@@ -152,8 +151,6 @@ export const TabManager: React.FC<TabManagerProps> = ({ className }) => {
   const [showRightScroll, setShowRightScroll] = useState(false);
   const [draggedTabId, setDraggedTabId] = useState<string | null>(null);
   
-  // Analytics tracking
-  const trackEvent = useTrackEvent();
 
   // Listen for tab switch events
   useEffect(() => {
@@ -172,15 +169,10 @@ export const TabManager: React.FC<TabManagerProps> = ({ className }) => {
   useEffect(() => {
     const handleCreateTab = () => {
       createProjectsTab();
-      trackEvent.tabCreated('projects');
     };
 
     const handleCloseTab = async () => {
       if (activeTabId) {
-        const tab = tabs.find(t => t.id === activeTabId);
-        if (tab) {
-          trackEvent.tabClosed(tab.type);
-        }
         await closeTab(activeTabId);
       }
     };
@@ -262,26 +254,16 @@ export const TabManager: React.FC<TabManagerProps> = ({ className }) => {
     if (oldIndex !== -1 && newIndex !== -1 && oldIndex !== newIndex) {
       // Use the context's reorderTabs function
       reorderTabs(oldIndex, newIndex);
-      // Track the reorder event
-      trackEvent.featureUsed?.('tab_reorder', 'drag_drop', { 
-        from_index: oldIndex, 
-        to_index: newIndex 
-      });
     }
   };
 
   const handleCloseTab = async (id: string) => {
-    const tab = tabs.find(t => t.id === id);
-    if (tab) {
-      trackEvent.tabClosed(tab.type);
-    }
     await closeTab(id);
   };
 
   const handleNewTab = () => {
     if (canAddTab()) {
       createProjectsTab();
-      trackEvent.tabCreated('projects');
     }
   };
 

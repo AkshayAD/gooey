@@ -1,12 +1,12 @@
 # Welcome Contributors
 
-We welcome contributions to enhance Gooey's capabilities and improve its performance. To report bugs, create a [GitHub issue](https://github.com/getAsterisk/gooey/issues).
+We welcome contributions to enhance Clode's capabilities and improve its performance. To report bugs, create a [GitHub issue](https://github.com/getAsterisk/gooey/issues).
 
 > Before contributing, read through the existing issues and pull requests to see if someone else is already working on something similar. That way you can avoid duplicating efforts.
 
 To contribute, please follow these steps:
 
-1. Fork the Gooey repository on GitHub.
+1. Fork the Clode repository on GitHub.
 2. Create a new branch for your feature or bug fix.
 3. Make your changes and ensure that the code passes all tests.
 4. Submit a pull request describing your changes and their benefits.

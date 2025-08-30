@@ -32,7 +32,6 @@ import { ExecutionControlBar } from "./ExecutionControlBar";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { HooksEditor } from "./HooksEditor";
-import { useTrackEvent, useComponentMetrics, useFeatureAdoptionTracking } from "@/hooks";
 import { useTabState } from "@/hooks/useTabState";
 
 interface AgentExecutionProps {
@@ -99,11 +98,6 @@ export const AgentExecution: React.FC<AgentExecutionProps> = ({
   const [rawJsonlOutput, setRawJsonlOutput] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [copyPopoverOpen, setCopyPopoverOpen] = useState(false);
-  
-  // Analytics tracking
-  const trackEvent = useTrackEvent();
-  useComponentMetrics('AgentExecution');
-  const agentFeatureTracking = useFeatureAdoptionTracking(`agent_${agent.name || 'custom'}`);
   
   // Hooks configuration state
   const [isHooksDialogOpen, setIsHooksDialogOpen] = useState(false);
@@ -305,16 +299,6 @@ export const AgentExecution: React.FC<AgentExecutionProps> = ({
       console.log("Agent execution started with run ID:", executionRunId);
       setRunId(executionRunId);
       
-      // Track agent execution start
-      trackEvent.agentStarted({
-        agent_type: agent.name || 'custom',
-        agent_name: agent.name,
-        has_custom_prompt: task !== agent.default_task
-      });
-      
-      // Track feature adoption
-      agentFeatureTracking.trackUsage();
-      
       // Set up event listeners with run ID isolation
       const outputUnlisten = await listen<string>(`agent-output:${executionRunId}`, (event) => {
         try {
@@ -332,14 +316,6 @@ export const AgentExecution: React.FC<AgentExecutionProps> = ({
       const errorUnlisten = await listen<string>(`agent-error:${executionRunId}`, (event) => {
         console.error("Agent error:", event.payload);
         setError(event.payload);
-        
-        // Track agent error
-        trackEvent.agentError({
-          error_type: 'runtime_error',
-          error_stage: 'execution',
-          retry_count: 0,
-          agent_type: agent.name || 'custom'
-        });
       });
 
       const completeUnlisten = await listen<boolean>(`agent-complete:${executionRunId}`, (event) => {
@@ -352,20 +328,11 @@ export const AgentExecution: React.FC<AgentExecutionProps> = ({
           if (tabId) {
             updateTabStatus(tabId, 'error');
           }
-          // Track both the old event for compatibility and the new error event
-          trackEvent.agentExecuted(agent.name || 'custom', false, agent.name, duration);
-          trackEvent.agentError({
-            error_type: 'execution_failed',
-            error_stage: 'completion',
-            retry_count: 0,
-            agent_type: agent.name || 'custom'
-          });
         } else {
           // Update tab status to complete on success
           if (tabId) {
             updateTabStatus(tabId, 'complete');
           }
-          trackEvent.agentExecuted(agent.name || 'custom', true, agent.name, duration);
         }
       });
 

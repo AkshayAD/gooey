@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Settings, Minus, Square, X, Bot, BarChart3, FileText, Network, Info, MoreVertical } from 'lucide-react';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { TooltipProvider, TooltipSimple } from '@/components/ui/tooltip-modern';
+import { ClaudeStatusIndicator } from '@/components/ClaudeStatusIndicator';
 
 interface CustomTitlebarProps {
   onSettingsClick?: () => void;
@@ -171,6 +172,14 @@ export const CustomTitlebar: React.FC<CustomTitlebarProps> = ({
 
         {/* Secondary actions group */}
         <div className="flex items-center gap-1">
+          {/* Claude Status Indicator - simplified for titlebar */}
+          <div className="px-2">
+            <ClaudeStatusIndicator 
+              onConfigureClick={onSettingsClick} 
+              className="scale-90" 
+            />
+          </div>
+
           {onSettingsClick && (
             <TooltipSimple content="Settings" side="bottom">
               <motion.button
